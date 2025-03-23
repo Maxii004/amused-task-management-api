@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task-management-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: task-management-api
+  template:
+    metadata:
+      labels:
+        app: task-management-api
+    spec:
+      spec:
+      containers:
+        - name: task-api
+          image: mineth/task-management-api  # Use the locally built image
+          ports:
+            - containerPort: 8080
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: aws-secret-access-key
+            - name: AWS_REGION
+              value: us-east-1
+            - name: S3_BUCKET_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: s3-config
+                  key: bucket-name
+            - name: CDN_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: s3-config
+                  key: cdn-url
+            - name: JSON_PLACEHOLDER_URL
+              value: https://jsonplaceholder.typicode.com
