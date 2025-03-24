@@ -2,8 +2,8 @@ name: Deploy to EKS
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - 'feature/github-actions'
 
 jobs:
   deploy:
