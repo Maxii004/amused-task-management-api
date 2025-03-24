@@ -12,7 +12,6 @@ spec:
       labels:
         app: task-management-api
     spec:
-      spec:
       containers:
         - name: task-api
           image: <ECR_REGISTRY>/<ECR_REPOSITORY>:<IMAGE_TAG>
