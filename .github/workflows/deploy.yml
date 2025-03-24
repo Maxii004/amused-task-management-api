@@ -64,11 +64,3 @@ jobs:
           
           # Update the image
           kubectl set image deployment/task-management-api task-api=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-          # Apply environment variables from secrets (if not using ConfigMap)
-          kubectl set env deployment/task-management-api \
-            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
-            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
-            AWS_REGION=${{ secrets.AWS_REGION }} \
-            S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }} \
-            CDN_URL=${{ secrets.CDN_URL }}
