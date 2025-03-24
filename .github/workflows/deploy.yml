@@ -3,7 +3,7 @@ name: Deploy to EKS
 on:
   push:
     branches:
-      - master  # Trigger on push to the main branch
+      - 'master'
 
 jobs:
   deploy:
@@ -60,7 +60,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           # Apply the deployment if it doesn't exist
-          kubectl apply -f deployment.yaml
+          kubectl apply -f k8s/deployment.yaml
           
           # Update the image
           kubectl set image deployment/task-management-api task-api=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
