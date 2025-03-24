@@ -58,10 +58,11 @@ jobs:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
           IMAGE_TAG: ${{ github.sha }}
-          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
-          CDN_URL: ${{ secrets.CDN_URL }}
         run: |
-          # Update the deployment with the new image
+          # Apply the deployment if it doesn't exist
+          kubectl apply -f deployment.yaml
+          
+          # Update the image
           kubectl set image deployment/task-management-api task-api=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
           # Apply environment variables from secrets (if not using ConfigMap)
