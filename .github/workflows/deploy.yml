@@ -1,29 +1,28 @@
 name: Deploy to EKS
-
+ 
 on:
   push:
     branches:
       - 'master'
-
+ 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
+ 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-
+ 
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-
+ 
       - name: Create .env file
         run: |
           echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" > .env
@@ -32,7 +31,7 @@ jobs:
           echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> .env
           echo "CDN_URL=${{ secrets.CDN_URL }}" >> .env
           echo "JSON_PLACEHOLDER_URL=https://jsonplaceholder.typicode.com" >> .env
-
+ 
       - name: Build, tag, and push Docker image to Amazon ECR
         env:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
@@ -41,18 +40,18 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-
+ 
+ 
       - name: Install kubectl
         run: |
           curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
-
+ 
       - name: Configure kubectl for EKS
         run: |
           aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }}
-
+ 
       - name: Deploy to EKS
         env:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
@@ -61,6 +60,13 @@ jobs:
         run: |
           # Apply the deployment if it doesn't exist
           kubectl apply -f k8s/deployment.yaml
-          
+           
           # Update the image
           kubectl set image deployment/task-management-api task-api=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+ 
+          # Apply environment variables from secrets (if not using ConfigMap)
+          kubectl set env deployment/task-management-api \
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+            AWS_REGION=${{ secrets.AWS_REGION }} \
+            S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }} \
