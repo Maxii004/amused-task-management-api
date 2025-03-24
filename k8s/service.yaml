@@ -1,13 +1,11 @@
-# service.yaml
 apiVersion: v1
 kind: Service
 metadata:
   name: task-management-api
 spec:
+  type: LoadBalancer
+  ports:
+    - port: 8080
+      targetPort: 8080
   selector:
     app: task-management-api
-  ports:
-    - protocol: TCP
-      port: 8080
-      targetPort: 8080
-  type: ClusterIP  # Or LoadBalancer/NodePort
