@@ -15,7 +15,7 @@ spec:
       spec:
       containers:
         - name: task-api
-          image: mineth/task-management-api  # Use the locally built image
+          image: <ECR_REGISTRY>/<ECR_REPOSITORY>:<IMAGE_TAG>
           ports:
             - containerPort: 8080
           env:
